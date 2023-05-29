@@ -16,7 +16,7 @@ The DynamicEX software package already contains most of the software required fo
 
 - Python (>= 3.6)
 - Snakemake (== 5.4.5)
-- Singularity ()>= 3.7.2)
+- Singularity (>= 3.7.2)
 
 Python：
 
