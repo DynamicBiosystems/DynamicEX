@@ -1,0 +1,330 @@
+import json
+import os
+from pathlib import Path
+
+###get soft path
+home = Path(config['softhome'])
+
+if config['subCommand'] == 'mkref':
+    genome_name = config["genome_name"]
+    rule all:
+        input:
+            f'{genome_name}/SAindex',
+
+    rule mkref:
+        input:
+            genome_name = config['genome_name'],
+            fasta = config['fasta'],
+            gtf = config['gtf'],
+        output:
+            f'{genome_name}/SAindex',
+        params:
+            threads = int(config['threads']),
+        singularity:
+            str(home/'sif/DynamicEX.sif')
+        shell:
+            "/opt/anaconda3/bin/STAR --runMode genomeGenerate --runThreadN {params.threads} --genomeDir {input.genome_name} --genomeFastaFiles {input.fasta} --sjdbGTFfile {input.gtf} --sjdbOverhang 91"
+else:
+    sample_name = config['sample']
+    whitelist = config['whitelist']
+
+    CBlen = int(config['CBlen'])
+    UMIlen = int(config['UMIlen'])
+    CBstart = int(config['CBstart'])
+    UMIstart = int(config['UMIstart'])
+
+    outputdir = Path(config['outputdir']).absolute()
+
+    ###get TMPDIR
+    TMP = Path(config['TMP'])
+
+    cellcalling_method = str(config['cellcalling'])
+    library = config['library']
+    if library == "Decoder1.0":
+        CBlen = 12
+        UMIlen = 8
+        CBstart = 26
+        UMIstart = 37
+    include_introns = config['include_introns']
+    count_type = "Gene" if include_introns else "GeneFull"
+
+    rule all:
+        input:
+            outputdir/f"{sample_name}/outs/analysis/clustering/graphclust/clusters.csv",
+
+    def cellcalling(cells,method = "EmptyDrops_CR"):
+        if method == "EmptyDrops_CR":
+            return f"EmptyDrops_CR {cells} 0.99 10 45000 90000 500 0.01 20000 0.01 10000 "
+        elif method == "TopCells":
+            return f"TopCells {cells} "
+        else:
+            return f"CellRanger2.2 {cells} 0.99 10 "
+
+    if whitelist:
+        rule DataSplit:
+            input:
+                config['R1']
+            output:
+                str(outputdir/"_whitelist_temp/file_split_done.txt")
+            params:
+                str(outputdir/"_whitelist_temp"),
+            singularity:
+                str(home/'sif/DynamicEX.sif')
+            shell:
+                "cd {params};"
+                "/opt/anaconda3/bin/pigz -dc {input}|split --suffix-length 4 --additional-suffix _whitelist -l 40000000&&touch {output}"
+
+        rule CreateWhiteList:
+            input:
+                rules.DataSplit.output
+            output:
+                str(outputdir/"barcode_whitelist.txt")
+            params:
+                output = str(outputdir/"_whitelist_temp"),
+                cells = config['expect_cells'],
+                pattern = config['pattern']
+            threads:
+                int(config['cores'])
+            singularity:
+                str(home/'sif/DynamicEX.sif')
+            shell:
+                f"/usr/local/bin/python {home}/script/CreateWhitelist.py --bc-pattern {{params.pattern}} "
+                "--expect-cells {params.cells} --nthreads {threads} --inputdir {params.output}"
+
+        rule RunSTARsolo:
+            input:
+                Whitelist = rules.CreateWhiteList.output,
+                R1 = config['R1'],
+                R2 = config['R2'],
+            params:
+                genomeDir = config['transcriptome'],
+                sample = config['sample'],
+                outputdir = Path(config['outputdir']).absolute(),
+                cells = config['expect_cells'],
+                cellcalling = cellcalling(config['expect_cells'],"EmptyDrops_CR"),
+                pigz = str(home/'bin/pigz'),
+            threads:
+                int(config['cores'])
+            output:
+                filtered = str(outputdir/f"{sample_name}/{count_type}/filtered/matrix.mtx"),
+                raw = str(outputdir/f"{sample_name}/{count_type}/raw/matrix.mtx"),
+                bam = str(outputdir/f"Aligned.sortedByCoord.out.bam"),
+                STARSummary = outputdir/f"{sample_name}/{count_type}/Summary.csv",
+                UMIpreCell = outputdir/f"{sample_name}/{count_type}/UMIperCellSorted.txt",
+                STARLog = outputdir/"Log.final.out",
+                
+            singularity:
+                str(home/'sif/DynamicEX.sif')
+            log:
+                str(outputdir/"logs/RunSTARsolo.log")
+            shell:
+                "cd {params.outputdir}&&/opt/anaconda3/bin/STAR  --genomeDir {params.genomeDir} --readFilesCommand {params.pigz} -dc "
+                "--readFilesIn {input.R2} {input.R1} --soloType CB_UMI_Simple --soloCBwhitelist {input.Whitelist} "
+                "--soloBarcodeReadLength 0 --limitGenomeGenerateRAM 100000000000 --limitBAMsortRAM 100000000000 "
+                f"--runThreadN {{threads}} --soloCBstart {CBstart} --soloCBlen {CBlen} --soloUMIstart {UMIstart} --soloUMIlen {UMIlen} --soloUMIfiltering MultiGeneUMI_CR"
+                "--soloUMIdedup 1MM_CR --soloOutFileNames {params.sample}/ "
+                "--soloCellFilter {params.cellcalling} --outSAMtype BAM SortedByCoordinate "
+                "--outSAMattributes GX GN CB UB --soloFeatures Gene GeneFull 1>{log} 2>&1"
+    else:
+        cellcalling_string = cellcalling(config['expect_cells'],cellcalling_method)
+        if library == "SM1.0":
+            whitelist_file1 = f"{home}/script/barcode_segment_barcode1.xls"
+            whitelist_file2 = f"{home}/script/barcode_segment_barcode2.xls"
+            whitelist_file3 = f"{home}/script/barcode_segment_barcode3.xls"
+            RunSTARsolo_shell = f'cd {outputdir}&&/opt/anaconda3/bin/STAR  --genomeDir {config["transcriptome"]} --readFilesCommand {home}/bin/pigz -dc --clipAdapterType CellRanger4 \
+                --readFilesIn {config["R2"]} {config["R1"]} --limitGenomeGenerateRAM 100000000000 --limitBAMsortRAM 100000000000 \
+                --soloType CB_UMI_Complex --soloCBwhitelist {whitelist_file1} {whitelist_file2} {whitelist_file3} --soloBarcodeReadLength 0 \
+                --runThreadN {config["cores"]} --soloCBstart {CBstart} --soloCBlen {CBlen} --soloUMIstart {UMIstart} --soloUMIlen {UMIlen} --soloUMIfiltering MultiGeneUMI_CR \
+                --soloUMIdedup 1MM_CR --soloOutFileNames {config["sample"]}/ \
+                --soloCellFilter {cellcalling_string} --outSAMtype BAM SortedByCoordinate \
+                --outSAMattributes CR GX GN CB UB --soloFeatures Gene GeneFull \
+                --soloCBmatchWLtype EditDist_2 --soloCBposition 0_0_0_7 0_8_0_15 0_16_0_23 --soloUMIposition 0_24_0_31'
+        else:
+            RunSTARsolo_shell = f'cd {outputdir}&&/opt/anaconda3/bin/STAR  --genomeDir {config["transcriptome"]} --readFilesCommand {home}/bin/pigz -dc --clipAdapterType CellRanger4 \
+                --readFilesIn {config["R2"]} {config["R1"]} --limitGenomeGenerateRAM 100000000000 --limitBAMsortRAM 100000000000 \
+                --soloType CB_UMI_Simple --soloCBwhitelist None --soloBarcodeReadLength 0 \
+                --runThreadN {config["cores"]} --soloCBstart {CBstart} --soloCBlen {CBlen} --soloUMIstart {UMIstart} --soloUMIlen {UMIlen} --soloUMIfiltering MultiGeneUMI_CR \
+                --soloUMIdedup 1MM_CR --soloOutFileNames {config["sample"]}/ \
+                --soloCellFilter {cellcalling_string} --outSAMtype BAM SortedByCoordinate \
+                --outSAMattributes GX GN CB UB --soloFeatures Gene GeneFull'
+
+        rule RunSTARsolo:
+            input:
+                R1 = config['R1'],
+                R2 = config['R2'],
+            params:
+                genomeDir = config['transcriptome'],
+                sample = config['sample'],
+                outputdir = Path(config['outputdir']).absolute(),
+                cells = config['expect_cells'],
+                cellcalling = cellcalling(config['expect_cells'],cellcalling_method),
+                pigz = str(home/'bin/pigz'),
+            threads:
+                int(config['cores'])
+            output:
+                filtered = str(outputdir/f"{sample_name}/{count_type}/filtered/matrix.mtx"),
+                raw = str(outputdir/f"{sample_name}/{count_type}/raw/matrix.mtx"),
+                bam = str(outputdir/f"Aligned.sortedByCoord.out.bam"),
+                STARSummary = outputdir/f"{sample_name}/{count_type}/Summary.csv",
+                UMIpreCell = outputdir/f"{sample_name}/{count_type}/UMIperCellSorted.txt",
+                STARLog = outputdir/"Log.final.out",
+            singularity:
+                str(home/'sif/DynamicEX.sif')
+            log:
+                str(outputdir/"logs/RunSTARsolo.log")
+            shell:
+                "{RunSTARsolo_shell} 1>{log} 2>&1"
+
+    ###
+    rule fastp:
+        input:
+            R2 = config['R2'],
+        output:
+            str(outputdir/"fastp.json")
+        threads:
+            6 if int(int(config['cores'])/2) > 6 else int(int(config['cores'])/2)
+        singularity:
+            str(home/'sif/fastp_v0.20.sif')
+        log:
+            str(outputdir/"logs/fastp.log")
+        shell:
+            "/opt/conda/bin/fastp -i {input} -j {output} -w {threads} 1>{log} 2>&1"
+
+    rule IndexSTARBam:
+        input:
+            rules.RunSTARsolo.output.bam
+        threads:
+            int(int(config['cores'])/2)
+        output:
+            str(outputdir/f"Aligned.sortedByCoord.out.bam.bai")
+        singularity:
+            str(home/'sif/DynamicEX.sif')
+        shell:
+            "/opt/anaconda3/bin/sambamba index -t {threads} {input}"
+
+
+    rule ConfidentlyReads:
+        input:
+            rules.IndexSTARBam.output
+        params:
+            bam = str(outputdir/f"Aligned.sortedByCoord.out.bam")
+        output:
+            bam = str(outputdir/f"Aligned.sortedByCoord.MapQ255.out.bam"),
+            bai = str(outputdir/f"Aligned.sortedByCoord.MapQ255.out.bam.bai"),
+        log:
+            str(outputdir/"logs/ConfidentlyReads.log")
+        threads:
+            int(int(config['cores'])/2)
+        singularity:
+            str(home/'sif/DynamicEX.sif')
+        shell:
+            "/opt/anaconda3/bin/sambamba view -t {threads} --filter='mapping_quality==255' {params.bam} --format bam -o {output.bam}"
+
+    rule MappingRegion:
+        input:
+            rules.ConfidentlyReads.output
+        params:
+            outdir = str(outputdir/"qual_summary"),
+            gtf = config["gtf"],
+        output:
+            qc = str(outputdir/"qual_summary/rnaseq_qc_results.txt"),
+        threads:
+            int(int(config['cores'])/4)
+        singularity:
+            str(home/'sif/DynamicEX.sif')
+        log:
+            str(outputdir/"logs/MappingRegion.log")
+        shell:
+            "/opt/anaconda3/bin/qualimap rnaseq -a uniquely-mapped-reads -outformat PDF -outdir {params.outdir} "
+            "-bam {input} -gtf {params.gtf} "
+            "-p strand-specific-forward --java-mem-size=32G 1>{log} 2>&1"
+
+            
+    rule SeqSaturation:
+        input:
+            bam = rules.ConfidentlyReads.output.bam,
+            bai = rules.ConfidentlyReads.output.bai
+        params:
+            barcodes_tsv = str(outputdir/f"{sample_name}/{count_type}/filtered/barcodes.tsv"),
+            Summary = str(outputdir/f"{sample_name}/{count_type}/Summary.csv"),
+            output = str(outputdir)
+        output:
+            str(outputdir/"SequencingSaturation.pdf")
+        threads:
+            int(config['cores'])
+        log:
+            str(outputdir/"logs/SeqSaturation.log")
+        singularity:
+            str(home/'sif/DynamicEX.sif')
+        shell:
+            f"""
+    export TMPDIR={TMP}&&/usr/local/bin/python {home}/script/GetSequencingSaturation.py --bam {{input.bam}} --barcodes {{params.barcodes_tsv}} --nthreads {{threads}} --ouputdir {{params.output}} --summary {{params.Summary}} 2>>{{log}}
+            """
+
+    ###/opt/script/GetSequencingSaturation.py
+    rule Rename:
+        input:
+            rules.MappingRegion.output,
+            rules.SeqSaturation.output
+        output:
+            outputdir/f"{sample_name}/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
+            outputdir/f"{sample_name}/outs/metrics_summary.csv",
+        params:
+            filtered = outputdir/f"{sample_name}/outs/filtered_feature_bc_matrix",
+            raw      = outputdir/f"{sample_name}/outs/raw_feature_bc_matrix",
+            starfd   = outputdir/f"{sample_name}/{count_type}/filtered/*",
+            starrw   = outputdir/f"{sample_name}/{count_type}/raw/*",
+            starsummary  = outputdir/f"{sample_name}/{count_type}/Summary.csv",
+            summary  =  outputdir/f"{sample_name}/outs/metrics_summary.csv",
+            pigz     = str(home/'bin/pigz'),
+            script = "/opt/script/Rename.py",
+        threads:
+            int(config['cores'])
+        singularity:
+            str(home/'sif/DynamicEX.sif')
+        shell:
+            """
+    mkdir -p {params.filtered} {params.raw};
+    /usr/local/bin/python {params.script} {params.starsummary} {params.summary} {threads} {params.pigz}
+    cp -rf {params.starfd} {params.filtered};
+    cp -rf {params.starrw} {params.raw};
+            """
+
+    rule MakeReport:
+        input:
+            rename = rules.Rename.output,
+            RnaSeqMetrics = rules.MappingRegion.output.qc,
+            STARSummary = outputdir/f"{sample_name}/{count_type}/Summary.csv",
+            metrics_summary = outputdir/f"{sample_name}/outs/metrics_summary.csv",
+            UMIpreCell = outputdir/f"{sample_name}/{count_type}/UMIperCellSorted.txt",
+            sampleinfo = outputdir/"config.json",
+            STARLog = outputdir/"Log.final.out",
+            template = home/"template/WPSQCReport_temp.html",
+            saturation = rules.SeqSaturation.output,
+            fastp_qc = rules.fastp.output
+        params:
+            script = home/"script/MakeWPSReport.py",
+            QCdir = outputdir/f"{sample_name}/outs/"
+        output:
+            outputdir/f"{sample_name}/outs/WPS_summary.html"
+        singularity:
+            str(home/'sif/DynamicEX.sif')
+        shell:
+            "/usr/local/bin/python {params.script} --UMIpreCell {input.UMIpreCell} --RnaSeqMetrics {input.RnaSeqMetrics} "
+            "--STARSummary {input.STARSummary} --sampleinfo {input.sampleinfo} --STARLog {input.STARLog} "
+            "--report_temp {input.template} --output {output} --fastp {input.fastp_qc} --MetricsSummary {input.metrics_summary}&&"
+            f"cp -r {home}/template/static {{params.QCdir}}"
+            
+    rule GraphClust:
+        input:
+            rules.MakeReport.output
+        params:
+            outputdir/f"{sample_name}/outs/filtered_feature_bc_matrix"
+        output:
+            outputdir/f"{sample_name}/outs/analysis/clustering/graphclust/clusters.csv",
+            outputdir/f"{sample_name}/outs/analysis/clustering/kmeans_10_clusters/clusters.csv",
+        singularity:
+            str(home/'sif/scanpy.sif')
+        shell:
+            f"/opt/venv/bin/python /opt/script/Cluster.py --inputdir {{params}};"
+            f"rm -rf {outputdir}/.java {outputdir}/.config {outputdir}/.cache {outputdir}/fastp* "

@@ -1,0 +1,200 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import re
+import os
+import json
+import logging
+import argparse
+from glob import glob
+from pathlib import Path
+from subprocess import run
+
+logger = logging.getLogger()
+logger.setLevel("INFO")
+
+def parseArgs():
+    parser = argparse.ArgumentParser(prog='DynamicEX')
+    subparsers = parser.add_subparsers(dest='subCommand', help='sub-command help')
+    parser.add_argument('-v', '--version', help='software version',action="store_true")
+
+    parserParent = argparse.ArgumentParser(add_help = False)
+    parserParent.add_argument("-F",'--forceall',action='store_true',help="Force the execution of the selected (or the first) rule and all rules it is dependent on regardless of already created output.")
+    parserParent.add_argument('-n','--dryrun',action='store_true',help="Do not execute anything, and display what would be done. If you have a very large workflow, use --dryrun --quiet to just print a summary of the DAG of jobs.")
+    parserParent.add_argument('--cores',default=16,help="set max cores the pipeline may request at one time.;default 16")
+
+    parser_a = subparsers.add_parser('count', parents = [parserParent])
+    parser_a.add_argument('-S','--sample',required=True,help="Sample name of each batch,required")
+    parser_a.add_argument('--id',required=True,help="Final sample name,required")
+    parser_a.add_argument('-I','--inputdir',required=True,help="raw data path,required")
+    parser_a.add_argument('-g','--gtf',required=True,help="genome annotation file,required")
+    parser_a.add_argument("--transcriptome",required=True,help="Path of folder containing transcriptome reference,required")
+
+    parser_a.add_argument('-o','--outputdir',default="./",help="output file name,default ./")
+    parser_a.add_argument("--expect-cells",default=3000,help="expect-cells,default 3000")
+    parser_a.add_argument("--CBstart",default=26,help="barcode start,default 26")
+    parser_a.add_argument("--CBlen",default=12,help="barcode len,default 12")
+    parser_a.add_argument("--UMIstart",default=38,help="umi start,default 38")
+    parser_a.add_argument("--UMIlen",default=8,help="umi len,default 8")
+
+    parser_a.add_argument("--cellcalling",choices=["EmptyDrops_CR","CellRanger2.2","TopCells"],default="EmptyDrops_CR",help="method of cellcalling,default EmptyDrops_CR")
+    parser_a.add_argument("--include_introns",default="False",help="Include intronic reads in count",action="store_true")
+    parser_a.add_argument("--library",choices=["Decoder1.0"],default="Decoder1.0",help="library version,default Decoder1.0")
+    parser_a.add_argument('--whitelist', dest='whitelist', action='store_true',help="use barcode whitelist")
+
+    parser_mkref = subparsers.add_parser('mkref', parents = [parserParent])
+    parser_mkref.add_argument("--genome_name", required=True,help="output dir, used to build genome")
+    parser_mkref.add_argument("--fasta", required=True,help="path to FASTA file containing your genome reference")
+    parser_mkref.add_argument("--gtf", required=True,help="Path to genes GTF file containing annotated genes for your genome reference")
+    parser_mkref.add_argument("--threads", help=" Number of threads used during STAR genome index generation. Defaults to 8", default=8)
+
+    args = parser.parse_args()
+
+    version = "DynamicEX 1.0.0"
+    info = f"""
+{version}
+
+USAGE:
+    DynamicEX <SUBCOMMAND>
+
+SUBCOMMANDS:
+    count               Count gene expression (targeted or whole-transcriptome) and/or feature barcode reads from a single sample and GEM well
+    mkref               Prepare a reference for use with well-paired seq analysis software. Requires a GTF and FASTA
+"""
+    if not args.subCommand and not args.version:
+        print(info)
+        exit()
+    if args.version:
+        print(version)
+        exit()
+    return(args)
+
+def getInfo(args, home):
+    bind = {}
+    if args.subCommand == "count":
+        R1 = []
+        R2 = []
+        for sample in str(args.sample).split(","):
+            regex = f"{sample}\_S\d+\_L\d+\_R1\_\d+.fastq.gz"
+            for elem in args.inputdir.split(","):
+                gzfile = Path(elem).glob(f"{sample}*gz")
+                for file in gzfile:
+                    if re.match(regex,file.name):
+                        R1.append(str(file.absolute()))
+                        R2.append(str(file.absolute()).replace("R1_","R2_"))
+                    elif re.match(f"{sample}.*?L\d+\_1.fq.gz",file.name):
+                        R1.append(str(file.absolute()))
+                        R2.append(str(file.absolute()).replace("_1.fq.gz","_2.fq.gz"))
+        if not R1:
+            print("Corresponding file not found!")
+            exit()
+
+        if len(R1) == 1:
+            R1_path = R1[0]
+            R2_path = R2[0]
+        else:
+            pwd = Path(args.outputdir).absolute()
+            (pwd/'combine_data').mkdir(parents=True, exist_ok=True)
+            
+            logging.info(f"cat {' '.join(R1)} > {pwd/'combine_data'}/{args.id}_S1_L002_R1_001.fastq.gz")
+            os.system(f"cat {' '.join(R1)} > {pwd/'combine_data'}/{args.id}_S1_L002_R1_001.fastq.gz")
+            logging.info(f"cat {' '.join(R2)} > {pwd/'combine_data'}/{args.id}_S1_L002_R2_001.fastq.gz")
+            os.system(f"cat {' '.join(R2)} > {pwd/'combine_data'}/{args.id}_S1_L002_R2_001.fastq.gz")
+            
+            R1_path = str(pwd/'combine_data'/f"{args.id}_S1_L002_R1_001.fastq.gz")
+            R2_path = str(pwd/'combine_data'/f"{args.id}_S1_L002_R2_001.fastq.gz")
+
+        info = {
+            "subCommand":args.subCommand,
+            "R1":f"{R1_path}","R2":f"{R2_path}",
+            "sample":args.id,
+            "transcriptome":str(Path(args.transcriptome).absolute()),
+            "cores":args.cores,
+            "gtf":str(Path(args.gtf).absolute()),
+            "CBlen":args.CBlen,
+            "UMIlen":args.UMIlen,
+            "CBstart":args.CBstart,
+            "UMIstart":args.UMIstart,
+            "expect_cells":args.expect_cells,
+            "whitelist":args.whitelist,
+            "include_introns":args.include_introns,
+            "outputdir":str(Path(args.outputdir).absolute()),
+            "softhome":str(home),
+            "cellcalling":args.cellcalling,
+            "library":args.library
+        }
+
+        (Path(args.outputdir)/"logs").mkdir(parents=True, exist_ok=True)
+
+        bind_key = ['R1', 'R2','transcriptome','gtf','outputdir']
+
+        HOME = os.environ.get('HOME',"no-exist")
+        if Path(HOME).exists():
+            TMP = Path(HOME)/"tmp"
+            bind[str(HOME)]=str(HOME)
+            os.system(f"mkdir -p -m 1777 {TMP}")
+            os.system(f"export TMPDIR={TMP}")
+        else:
+            TMP = info['outputdir']/"tmp"
+            os.system(f"mkdir -p -m 1777 {TMP}")
+            os.system(f"export TMPDIR={TMP}")
+
+        info['TMP'] = str(TMP)
+
+    if args.subCommand == "mkref":
+        (Path(args.genome_name)).mkdir(parents=True, exist_ok=True)
+        info = {
+            "subCommand":args.subCommand,
+            "genome_name":str(os.path.abspath(args.genome_name)),
+            "fasta":str(Path(args.fasta).absolute()),
+            "gtf":str(Path(args.gtf).absolute()),
+            "threads":args.threads,
+            "cores":args.cores,
+            "softhome":str(home),
+        }
+        bind_key = ["genome_name", "fasta", "gtf"]
+
+    for key in bind_key:
+        bind[str(Path(info[key]).parent.absolute())]=1
+    bind[str(home)]=str(home)
+
+    return(info, bind)
+
+def main():
+    args = parseArgs()
+    home = Path(os.path.abspath(__file__)).parent.parent
+    info, bind = getInfo(args, home)
+
+    if args.subCommand == "count":
+        config_path = str((Path(args.outputdir)/"config.json").absolute())
+        with open(config_path,"w",encoding="utf-8") as out:
+            json.dump(info,out,ensure_ascii=False,indent = 4)
+    if args.subCommand == "mkref":
+        config_path = str((Path(args.genome_name)/"config.json").absolute())
+        with open(config_path,"w",encoding="utf-8") as out:
+            json.dump(info,out,ensure_ascii=False,indent = 4)
+
+    params = ' '.join([f'--bind {key}:{key} ' for key in bind])
+    snakemake = "snakemake"
+    snakefile = str(home/"bin/DynamicEX_pipeline")
+
+    if args.dryrun:
+        shell= [snakemake, '-s',snakefile, '--configfile',config_path,"--cores",str(info['cores']),'-pnr',"--use-singularity","--singularity-args",f'"{params}"']
+        print("\nRun command:")
+        logging.info(" ".join(shell))
+        print()
+        os.system(" ".join(shell))
+        exit()
+
+    if args.forceall:
+        shell= [snakemake, '-s',snakefile, '--configfile',config_path,"--cores",str(info['cores']),'-pr','-F',"--use-singularity","--singularity-args",f'"{params}"']
+    else:
+        shell= [snakemake, '-s',snakefile, '--configfile',config_path,"--cores",str(info['cores']),'-pr',"--use-singularity","--singularity-args",f'"{params}"']
+
+    print("\nRun command:")
+    logging.info(" ".join(shell))
+    print()
+    os.system(" ".join(shell))
+
+if __name__ == "__main__":
+    main()

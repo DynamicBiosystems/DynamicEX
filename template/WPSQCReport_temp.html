@@ -1,0 +1,286 @@
+<!-- gy 2020.3 V0.2 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="Web Summary"/>
+    <meta name="author" content="德运康瑞 Dynamic Biosystems"/>
+    <title>
+        德运康瑞
+    </title>
+    <link rel="canonical" href=""/>
+    <!-- Bootstrap core CSS -->
+    <link href="./static/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="./static/css/report.css" rel="stylesheet"/>
+    <link href="./static/css/font-awesome.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="./static/css/bootstrap-table.min.css"/>
+    <!-- Favicons -->
+    <link rel="icon" href="./static/image/favicon.ico"/>
+    <script src="./static/js/bootstrap.bundle.min.js"></script>
+    <script src="./static/js/docs.min.js"></script>
+    <script src="./static/js/jquery-3.6.0.min.js"></script>
+    <script src="./static/js/bootstrap-table.min.js"></script>
+    <style>
+      .row{
+        height: auto;
+        margin: 5px;
+      }
+      .row>div{
+        height: auto;
+        text-align: center;
+      }
+      .container{
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+      }
+      .border{
+        border: 1px;
+        border-radius:25px;
+        margin: 4px;
+      }
+      .image{
+        max-width: 100%;
+        max-height: auto;
+      }
+    </style>
+  </head>
+
+  <body data-bs-spy="scroll" data-bs-target="#catalogue" data-bs-offset="100">
+    <header class="navbar navbar-expand-md navbar-dark bd-navbar">
+      <nav class="container-xxl flex-wrap flex-md-nowrap" aria-label="Main navigation">
+        <a class="navbar-brand p-0 me-2" href="" aria-label="Bootstrap">
+          <img src="./static/image/favicon.ico" alt="德运康瑞" width="45px"/>
+            德运康瑞
+          <small>
+            Dynamic Biosystems
+          </small>
+        </a>
+        <div class="collapse navbar-collapse" id="bdNavbar">
+          <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0"></ul>
+          <hr class="d-md-none text-white-50"/>
+          <ul class="navbar-nav flex-row flex-wrap ms-md-auto">
+            <li class="nav-item col-6 col-md-auto">
+              <a class="nav-link p-2" href="http://www.dynamic-biosystems.com/" target="_blank" rel="noopener">
+                <i class="fa fa-home"></i>
+              </a>
+            </li>
+            <li class="nav-item col-6 col-md-auto">
+              <a class="nav-link p-2" data-bs-toggle='tooltip' data-bs-placement="bottom" title="微信二维码：<img src='./static/image/QR.png' style='height:100px'>" data-bs-html = 'true'>
+                <i class="fa fa-wechat"></i>
+              </a>
+            </li>
+            <li class="nav-item col-6 col-md-auto">
+              <a class="nav-link p-2" data-bs-toggle='tooltip' data-bs-placement="bottom" title="0592-7061526">
+                <i class="fa fa-phone"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    <script>
+        $(function () { $("[data-bs-toggle='tooltip']").tooltip(); });
+    </script>
+    <br />
+    <br />
+    <br />
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="row">
+            <div class = "col-md-12 border">
+              <h1>$$Estimated Number of Cells$$</h1>Estimated Number of Cells
+            </div>
+            <div class = "col-md-12 border">
+              <div class="row">
+                <div class = "col-md-6">
+                  <h1>$$Mean Reads per Cell$$</h1>Mean Reads per Cell
+                </div>
+                <div class = "col-md-6">
+                  <h1>$$Median Genes per Cell$$</h1>Median Genes per Cell
+                </div>
+              </div>
+            </div>
+            <div class = "col-md-12 border">
+              <table class = 'table table-hover table-striped'>
+                <thead style="text-align: left">
+                  <tr>
+                    <th><h2>Sequencing</h2></th>
+                  </tr>
+                </thead>
+                <tbody style="text-align: left">
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Total number of read pairs that were assigned to this library in demultiplexing.">Number of Reads</th>
+                    <th>$$Number of Reads$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of reads with barcodes that match the whitelist after barcode correction.">Valid Barcodes</th>
+                    <th>$$Valid Barcodes$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="The fraction of reads originating from an already-observed UMI. This is a function of library complexity and sequencing depth. More specifically, this is the fraction of confidently mapped, valid cell-barcode, valid UMI reads that had a non-unique (cell-barcode, UMI, gene).">Sequencing Saturation</th>
+                    <th>$$Sequencing Saturation$$</th>
+                  </tr>
+                  $$CB+UMI$$
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="GC Content">GC Content</th>
+                    <th>$$gc_content$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of RNA read bases with Q-score >= 20, excluding very low quality/no-call (Q <= 2) bases from the denominator.">Q20 Bases in RNA Read</th>
+                    <th>$$q20_rate$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of RNA read bases with Q-score >= 30, excluding very low quality/no-call (Q <= 2) bases from the denominator.">Q30 Bases in RNA Read</th>
+                    <th>$$Q30 Bases in RNA Read$$</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-12 border">
+              <div class="row">
+                <div class="col-md-12">
+                  <h2 style="text-align: left">Cells</h2>
+                </div>
+                <div class="col-md-12">
+                  <img class= "image" src="./src/barcode_rank_plot.png" width="65%" alt="Barcode Rank Plot"/>
+                </div>
+                <div class="col-md-12">
+                  <table class = 'table table-hover table-striped'>
+                    <tbody style="text-align: left">
+                      <tr>
+                        <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="The number of barcodes associated with at least one cell.">Estimated Number of Cells</th>
+                        <th>$$Estimated Number of Cells$$</th>
+                      </tr>
+                      <tr>
+                        <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="The fraction of valid-barcode, confidently-mapped-to-exonic reads with cell-associated barcodes.">Fraction Reads in Cells</th>
+                        <th>$$Fraction Reads in Cells$$</th>
+                      </tr>
+                      <tr>
+                        <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="The total number of sequenced reads divided by the number of barcodes associated with cell-containing partitions.">Mean Reads per Cell</th>
+                        <th>$$Mean Reads per Cell$$</th>
+                      </tr>
+                      <tr>
+                        <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="The median number of UMI counts per %s cell-associated barcode.">Median UMI Counts per Cell</th>
+                        <th>$$Median UMI Counts per Cell$$</th>
+                      </tr>
+                      <tr>
+                        <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="The median number of genes detected per cell-associated barcode. Detection is defined as the presence of at least 1 UMI count.">Median Genes per Cell</th>
+                        <th>$$Median Genes per Cell$$</th>
+                      </tr>
+                      <tr>
+                        <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="The number of genes with at least one UMI count in any cell.">Total Genes Detected</th>
+                        <th>$$Total Genes Detected$$</th>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-12 border">
+              <table class = 'table table-hover table-striped'>
+                <thead style="text-align: left">
+                  <tr>
+                    <th><h2>Mapping</h2></th>
+                  </tr>
+                </thead>
+                <tbody style="text-align: left">
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of reads that mapped to the genome.">Reads Mapped to Genome</th>
+                    <th>$$Reads Mapped to Genome$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of reads that mapped uniquely to the genome.">Reads Mapped Confidently to Genome</th>
+                    <th>$$Reads Mapped Confidently to Genome$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of reads that mapped uniquely to an intergenic region of the genome.">Reads Mapped Confidently to Intergenic Regions</th>
+                    <th>$$Reads Mapped Confidently to Intergenic Regions$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of reads that mapped uniquely to an intronic region of the genome.">Reads Mapped Confidently to Intronic Regions</th>
+                    <th>$$Reads Mapped Confidently to Intronic Regions$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Fraction of reads that mapped uniquely to an exonic region of the genome.">Reads Mapped Confidently to Exonic Regions</th>
+                    <th>$$Reads Mapped Confidently to Exonic Regions$$</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-12 border">
+              <table class = 'table table-hover table-striped'>
+                <thead style="text-align: left">
+                  <tr>
+                    <th><h2>Sample</h2></th>
+                  </tr>
+                </thead>
+                <tbody style="text-align: left">
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Sample ID">Sample ID</th>
+                    <th>$$Sample ID$$</th>
+                  </tr>
+                  <tr>
+                    <th data-bs-toggle='tooltip' data-bs-placement="bottom" title="Sample Description">Sample Description</th>
+                    <th>$$Sample Description$$</th>
+                  </tr>
+                  <tr>
+                    <th  data-bs-toggle='tooltip' data-bs-placement="bottom" title="Chemistry">Chemistry</th>
+                    <th>$$Chemistry$$</th>
+                  </tr>
+                  <tr>
+                    <th  data-bs-toggle='tooltip' data-bs-placement="bottom" title="Include introns">Include introns</th>
+                    <th>$$Include introns$$</th>
+                  </tr>
+                  <tr>
+                    <th  data-bs-toggle='tooltip' data-bs-placement="bottom" title="Transcriptome">Transcriptome</th>
+                    <th>$$Transcriptome$$</th>
+                  </tr>
+                  <tr>
+                    <th  data-bs-toggle='tooltip' data-bs-placement="bottom" title="Pipeline Version">Pipeline Version</th>
+                    <th>$$Pipeline Version$$</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <footer class="bd-footer py-2 mt-5 bg-light">
+      <div class="container py-2">
+        <div class="text-center text-muted">
+          德运康瑞 Dynamic Biosystems
+        </div>
+      </div>
+    </footer>
+
+  </body>
+
+</html>
