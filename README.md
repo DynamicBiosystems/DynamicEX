@@ -105,7 +105,7 @@ DynamicEX mkref \
 DynamicEX count --sample sample --id S1 --inputdir rawdata/ --gtf Homo_sapiens.GRCh38.99.gtf --transcriptome Homo_sapiens_GRCh38 --outputdir result
 ```
 
-The detailed documentation of the web_summary.html in the results can be found at [summary](https://github.com/DynamicBiosystems/DynamicEX/doc/web_smmary.md)
+The detailed documentation of the web_summary.html in the results can be found at [summary](https://github.com/DynamicBiosystems/DynamicEX/tree/main/doc/web_smmary.md)
 
 ### About
 
