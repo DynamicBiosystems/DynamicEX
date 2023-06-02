@@ -46,7 +46,7 @@ Singularity:
 
 - Installation must be done using root privilege. Please refer to the official installation guide at [singularity](https://github.com/sylabs/singularity/blob/main/INSTALL.md). RPM installation is recommended.
 
-- Download sif files already built by DynamicEX. Download the compressed file from [here](https://bioservice.obs.cn-jssz1.ctyun.cn:443/hub%2Fsif.tar.gz?AccessKeyId=ZQMMROORLBRHRFUORXSZ).
+- Download sif files already built by DynamicEX. Download the compressed file from [here](https://bioservice.obs.cn-jssz1.ctyun.cn:443/hub%2Fsif.tar.gz?AccessKeyId=ZQMMROORLBRHRFUORXSZ&Expires=1694306336&Signature=7Lmyhd%2BaEm43DVEueos8M6aBdHY%3D).
 
 ```shell
 cd DynamicEX
