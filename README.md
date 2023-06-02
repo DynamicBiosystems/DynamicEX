@@ -16,7 +16,7 @@ The DynamicEX software package already contains most of the software required fo
 
 - Python (>= 3.6)
 - Snakemake (== 5.4.5)
-- Singularity ()>= 3.7.2)
+- Singularity (>= 3.7.2)
 
 Python：
 
@@ -45,6 +45,14 @@ conda install snakemake==5.4.5
 Singularity:
 
 - Installation must be done using root privilege. Please refer to the official installation guide at [singularity](https://github.com/sylabs/singularity/blob/main/INSTALL.md). RPM installation is recommended.
+
+- Download sif files already built by DynamicEX. Download the compressed file from [here](https://bioservice.obs.cn-jssz1.ctyun.cn:443/hub%2Fsif.tar.gz?AccessKeyId=ZQMMROORLBRHRFUORXSZ).
+
+```shell
+cd DynamicEX
+mkdir sif
+tar -zxf hub_sif.tar.gz -C sif
+```
 
 ### Manual
 
@@ -105,7 +113,7 @@ DynamicEX mkref \
 DynamicEX count --sample sample --id S1 --inputdir rawdata/ --gtf Homo_sapiens.GRCh38.99.gtf --transcriptome Homo_sapiens_GRCh38 --outputdir result
 ```
 
-The detailed documentation of the web_summary.html in the results can be found at [summary](https://github.com/DynamicBiosystems/DynamicEX/blob/main/doc/web_smmary.md)
+The detailed documentation of the web_summary.html in the results can be found at [summary](https://github.com/DynamicBiosystems/DynamicEX/blob/main/doc/web_summary.md)
 
 ### About
 
