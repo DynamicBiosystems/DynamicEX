@@ -4,11 +4,11 @@
 
 DynamicEX is a single-cell transcriptome data analysis software that includes multiple analysis steps. The input file is the original sequencing Fastq file, and the output is the cell expression matrix for subsequent analysis, as well as a web report that displays various statistical indicators of the data.
 
-### Install DynamicEX 1.0.0
+### Install DynamicEX 1.0.1
 
 ----
 
-Dowload DynamicEX from [here](https://github.com/DynamicBiosystems/DynamicEX/releases/tag/v1.0.0).
+Dowload DynamicEX from [here](https://github.com/DynamicBiosystems/DynamicEX/releases/tag/v1.0.1).
 
 ```shell
 # download DynamicEX.tar.gz
@@ -77,8 +77,10 @@ DynamicEX mkref \
 - count
 
 ```shell
-#The input folder must contain fastq files, with the same file format as sampleName_S1_L001_R1_001.fastq.gz
-DynamicEX count --sample sampleName --id sampleName --inputdir rawdata/ --gtf Homo_sapiens.GRCh38.99.gtf --transcriptome Homo_sapiens_GRCh38 --library DECODER_2.0 --outputdir result
+# The input folder must contain fastq files, with the same file format as sampleName_S1_L001_R1_001.fastq.gz
+# Library version was DECODER_2.0 for all users
+# Recommend using --include_Introns
+DynamicEX count --sample sampleName --id sampleName --inputdir rawdata/ --gtf Homo_sapiens.GRCh38.99.gtf --transcriptome Homo_sapiens_GRCh38 --library DECODER_2.0 --include_introns --outputdir result
 ```
 
 The detailed documentation of the web_summary.html in the results can be found at [summary](https://github.com/DynamicBiosystems/DynamicEX/blob/main/doc/web_summary.md).
