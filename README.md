@@ -4,11 +4,13 @@
 
 DynamicEX is a single-cell transcriptome data analysis software that includes multiple analysis steps. The input file is the original sequencing Fastq file, and the output is the cell expression matrix for subsequent analysis, as well as a web report that displays various statistical indicators of the data.
 
-### Install DynamicEX 1.0.1
+### Install DynamicEX
 
 ----
 
-Dowload DynamicEX from [here](https://github.com/DynamicBiosystems/DynamicEX/releases/tag/v1.0.1).
+If Conda has not been installed before, refer to the installation [doc](https://docs.conda.io/projects/miniconda/en/latest/miniconda-install.html).
+
+Dowload DynamicEX from [here](https://github.com/DynamicBiosystems/DynamicEX/releases/tag/v1.0.2).
 
 ```shell
 # download DynamicEX.tar.gz
@@ -51,9 +53,10 @@ conda-unpack
   - --UMIstart: umi start,default 38
   - --UMIlen: umi len,default 8
   - --cellcalling: method of cellcalling,default EmptyDrops_CR
-  - --include_introns: Include intronic reads in count
-  - --library: ibrary version, DECODER_1.0,DECODER_2.0
-  - --whitelist: use barcode whitelist
+  - --include_introns: include intronic reads in count
+  - --library: library version, DECODER_1.0,DECODER_2.0. DECODER_2.0 is the current version
+  - --r2_length: r2_length,default 91
+
 
 #### Quick start
 
