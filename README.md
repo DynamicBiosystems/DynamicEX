@@ -10,7 +10,7 @@ DynamicEX is a single-cell transcriptome data analysis software that includes mu
 
 If conda has not been installed before, refer to the installation [doc](https://docs.conda.io/projects/miniconda/en/latest/miniconda-install.html).
 
-Dowload DynamicEX from [here](https://github.com/DynamicBiosystems/DynamicEX/releases/tag/v1.0.2).
+Dowload DynamicEX from [here](https://github.com/DynamicBiosystems/DynamicEX/releases/tag/v1.0.3).
 
 ```shell
 # download DynamicEX.tar.gz
