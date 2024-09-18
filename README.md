@@ -86,7 +86,7 @@ DynamicEX mkref \
 DynamicEX count \
   --sample sampleName \
   --id sampleName \
-  --inputdir rawdata/ 
+  --inputdir rawdata/ \
   --gtf Homo_sapiens.GRCh38.99.gtf \
   --transcriptome Homo_sapiens_GRCh38 \
   --library DECODER_2.0 \
