@@ -72,9 +72,9 @@ gunzip Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 gunzip Homo_sapiens.GRCh38.99.gtf.gz
 
 DynamicEX mkref \
- --genome_name Homo_sapiens_GRCh38 \
- --fasta Homo_sapiens.GRCh38.dna.primary_assembly.fa \
- --gtf Homo_sapiens.GRCh38.99.gtf
+  --genome_name Homo_sapiens_GRCh38 \
+  --fasta Homo_sapiens.GRCh38.dna.primary_assembly.fa \
+  --gtf Homo_sapiens.GRCh38.99.gtf
 ```
 
 - count
@@ -83,7 +83,15 @@ DynamicEX mkref \
 # The input folder must contain fastq files, with the same file format as sampleName_S1_L001_R1_001.fastq.gz
 # Library version was DECODER_2.0 for all users
 # Recommend using --include_Introns
-DynamicEX count --sample sampleName --id sampleName --inputdir rawdata/ --gtf Homo_sapiens.GRCh38.99.gtf --transcriptome Homo_sapiens_GRCh38 --library DECODER_2.0 --include_introns --outputdir result
+DynamicEX count \
+  --sample sampleName \
+  --id sampleName \
+  --inputdir rawdata/ 
+  --gtf Homo_sapiens.GRCh38.99.gtf \
+  --transcriptome Homo_sapiens_GRCh38 \
+  --library DECODER_2.0 \
+  --include_introns \
+  --outputdir result
 ```
 
 The detailed documentation of the web_summary.html in the results can be found at [summary](https://github.com/DynamicBiosystems/DynamicEX/blob/main/doc/web_summary.md).
