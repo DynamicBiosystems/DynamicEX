@@ -60,20 +60,20 @@ The number of genes with at least one UMI count in any cell.
 
 - **Reads Mapped to Genome**
 
-Fraction of reads with valid barcode that mapped to the genome.
+Fraction of valid-barcode reads that mapped to the genome.
 
 - **Reads Mapped Confidently to Genome**
 
-Fraction of reads with valid barcode that mapped uniquely to the genome.
+Fraction of valid-barcode reads that mapped uniquely to the genome.
 
 - **Reads Mapped Confidently to Intergenic Regions**
 
-Fraction of reads with valid barcode that mapped uniquely to an intergenic region of the genome.
+Fraction of valid-barcode reads that mapped uniquely to an intergenic region of the genome.
 
 - **Reads Mapped Confidently to Intronic Regions**
 
-Fraction of reads with valid barcode that mapped uniquely to an intronic region of the genome.
+Fraction of valid-barcode reads that mapped uniquely to an intronic region of the genome.
 
 - **Reads Mapped Confidently to Exonic Regions**
 
-Fraction of reads with valid barcode that mapped uniquely to an exonic region of the genome.
+Fraction of valid-barcode reads that mapped uniquely to an exonic region of the genome.
