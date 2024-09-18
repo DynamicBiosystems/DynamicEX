@@ -1,4 +1,4 @@
-### DynamicEX introduction test
+### DynamicEX introduction
 
 ---
 
