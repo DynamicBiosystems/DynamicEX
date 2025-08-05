@@ -55,7 +55,7 @@ conda-unpack
   - --cellcalling: Method of cellcalling, default EmptyDrops_CR
   - --include_introns: Include intronic reads in count
   - --library: Library version, DECODER_1.0,DECODER_2.0. DECODER_2.0 is the current version
-  - --r2_length: r2_length, default 91
+  - --r2_length: r2_length, default 90
 
 
 #### Quick start
@@ -91,7 +91,7 @@ DynamicEX count \
   --transcriptome Homo_sapiens_GRCh38/star/ \
   --library DECODER_2.0 \
   --expect-cells 10000 \
-  --r2_length 91 \
+  --r2_length 90 \
   --include_introns \
   --outputdir result
 ```
@@ -103,6 +103,7 @@ The detailed documentation of the web_summary.html in the results can be found a
 ---
 
 DynamicEX is developed by dynamic-biosystems Co., Ltd. The official website is [www.dynamic-biosystems](http://www.dynamic-biosystems.com/).
+
 
 
 
