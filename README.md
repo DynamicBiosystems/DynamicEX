@@ -90,6 +90,8 @@ DynamicEX count \
   --gtf Homo_sapiens.GRCh38.99.gtf \
   --transcriptome Homo_sapiens_GRCh38 \
   --library DECODER_2.0 \
+  --expect-cells 10000 \
+  --r2_length 91 \
   --include_introns \
   --outputdir result
 ```
@@ -101,6 +103,7 @@ The detailed documentation of the web_summary.html in the results can be found a
 ---
 
 DynamicEX is developed by dynamic-biosystems Co., Ltd. The official website is [www.dynamic-biosystems](http://www.dynamic-biosystems.com/).
+
 
 
 
