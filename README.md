@@ -22,6 +22,16 @@ tar -zxf DynamicEX.tar.gz -C DynamicEX
 source DynamicEX/bin/activate # This command needs to be executed every time DynamicEX is used
 
 conda-unpack
+
+DynamicEX -h # Installation verification
+# usage: DynamicEX [-h] [-v] {count,mkref} ...
+
+# positional arguments:
+#   {count,mkref}  sub-command help
+
+# optional arguments:
+#   -h, --help     show this help message and exit
+#   -v, --version  software version
 ```
 
 ### Manual
