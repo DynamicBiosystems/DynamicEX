@@ -75,16 +75,34 @@ DynamicEX -h # Installation verification
 - mkref
 
 ```shell
+
+# For human：
+
 wget ftp://ftp.ensembl.org/pub/release-99/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 wget ftp://ftp.ensembl.org/pub/release-99/gtf/homo_sapiens/Homo_sapiens.GRCh38.99.gtf.gz
 
 gunzip Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 gunzip Homo_sapiens.GRCh38.99.gtf.gz
 
-DynamicEX mkref \
-  --genome_name Homo_sapiens_GRCh38/star/ \
-  --fasta Homo_sapiens.GRCh38.dna.primary_assembly.fa \
-  --gtf Homo_sapiens.GRCh38.99.gtf
+DynamicSD mkref \
+ --genome_name Homo_sapiens_GRCh38 \
+ --fasta Homo_sapiens.GRCh38.dna.primary_assembly.fa \
+ --gtf Homo_sapiens.GRCh38.99.gtf
+
+
+# For mouse：
+
+wget ftp://ftp.ensembl.org/pub/release-99/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
+wget ftp://ftp.ensembl.org/pub/release-99/gtf/mus_musculus/Mus_musculus.GRCm38.99.gtf.gz
+
+gunzip Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
+gunzip Mus_musculus.GRCm38.99.gtf.gz
+
+DynamicSD mkref \
+ --genome_name Mus_musculus.GRCm38 \
+ --fasta Mus_musculus.GRCm38.dna.primary_assembly.fa \
+ --gtf Mus_musculus.GRCm38.99.gtf
+
 ```
 
 - count
